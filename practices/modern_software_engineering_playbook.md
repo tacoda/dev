@@ -340,3 +340,93 @@ This document compiles key ideas from _Modern Software Engineering_ (Dave Farley
 - **Managing Coupling** → Depend on abstractions, keep connections loose.
 
 ---
+
+# Design Adherence Checklist
+
+## 1) Modularity
+
+- [ ] Does each module have a clearly defined public API (functions/classes/endpoints) documented in one place?
+- [ ] Can the module be built/tested in isolation without building unrelated modules?
+- [ ] Can the module be deployed (or versioned) independently from other modules?
+- [ ] Do modules avoid importing each other’s internal (non-public) files or packages?
+- [ ] Does a change to one module rarely require code changes in more than one other module?
+- [ ] Are module boundaries aligned to business capabilities (not just technical layers)?
+- [ ] Is there at most one reason to include this module as a dependency in other modules?
+- [ ] Are circular dependencies between modules absent?
+
+---
+
+## 2) Cohesion
+
+- [ ] Can you describe the module/class responsibility in a single sentence without “and”/“or”?
+- [ ] Do all public functions of the module/class directly serve that single responsibility?
+- [ ] Are data structures owned by the module used primarily by the module’s own behavior?
+- [ ] Are there no “grab bag”/utility classes that mix unrelated behaviors?
+- [ ] Does removing the module/class affect only features tied to its single purpose?
+- [ ] Do functions in the class frequently use the same fields (high functional affinity)?
+- [ ] Are workflows that span multiple responsibilities implemented across multiple modules (not crammed into one)?
+- [ ] Is any “temporary” unrelated logic removed or relocated before merge?
+
+---
+
+## 3) Separation of Concerns
+
+- [ ] Is UI/transport code free of domain/business rules?
+- [ ] Is domain code free of IO (network, filesystem, DB) and framework annotations where practical?
+- [ ] Are persistence concerns isolated behind repositories/gateways (no SQL in controllers/use-cases)?
+- [ ] Are external integrations (HTTP clients/SDKs) wrapped behind interfaces/ports?
+- [ ] Are cross-cutting concerns (logging, metrics, caching, auth) implemented via middleware/aspects/adapters rather than scattered?
+- [ ] Does changing the database or cache layer _not_ require changes to domain logic?
+- [ ] Does changing request/response shape at the edge _not_ require domain code changes?
+- [ ] Are configuration and environment concerns isolated from business logic?
+
+---
+
+## 4) Information Hiding & Abstraction
+
+- [ ] Are implementation details (private fields/helpers/SQL/SDK specifics) not exposed in public types or method signatures?
+- [ ] Do public interfaces describe _what_ the component does, not _how_ it does it?
+- [ ] Can you replace the implementation (e.g., swap DB/cache/provider) without changing callers?
+- [ ] Are invariants enforced internally (cannot be violated by callers)?
+- [ ] Are optional/experimental features hidden behind feature flags or internal APIs (not leaking to callers)?
+- [ ] Do modules expose minimal surface area (no unused public methods/fields)?
+- [ ] Are data transfer types (DTOs/events) stable and versioned when needed?
+- [ ] Are error types/results abstracted (callers don’t depend on low-level exception classes)?
+
+---
+
+## 5) Managing Coupling
+
+**General & Structural**
+
+- [ ] Do modules depend on interfaces/abstractions rather than concrete implementations?
+- [ ] Are there no compile-time circular dependencies between modules/packages?
+- [ ] Is the dependency graph acyclic and directed “inward” toward stable domain abstractions?
+
+**Temporal & Runtime**
+
+- [ ] Can components start in any order without failing (no fragile startup sequencing)?
+- [ ] Can services tolerate the absence or slowness of dependencies (timeouts/retries/fallbacks/circuit breakers)?
+- [ ] Do background jobs/event handlers retry idempotently without duplicating side-effects?
+
+**Data & Schema**
+
+- [ ] Are event/message schemas backward compatible (additive changes, versioning when needed)?
+- [ ] Do services avoid reaching into each other’s databases (no shared DB tables across services)?
+- [ ] Are integration contracts tested (consumer/provider or end-to-end contract tests)?
+
+**Change & Release**
+
+- [ ] Can you release one module/service without forcing synchronized releases of others?
+- [ ] Does a change in a low-level library rarely require changes in many dependents (fan-out contained)?
+- [ ] Are feature toggles used to decouple code integration from feature exposure?
+
+---
+
+## Quick Self-Assessment
+
+- **Excellent**: All or all but 1–2 items are **Yes** in each section.
+- **Good**: Most are **Yes**, with clear tickets to address the **No** answers.
+- **Risky**: Multiple **No** answers clustered in a section → prioritize refactoring there.
+
+---
