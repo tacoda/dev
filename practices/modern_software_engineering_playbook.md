@@ -232,3 +232,111 @@ This document compiles key ideas from _Modern Software Engineering_ (Dave Farley
 - **Incidents** → Evidence-driven response, add safety nets.
 
 ---
+
+# Part IV: Design Strategies
+
+## 1. Modularity
+
+### Strategies
+
+- Break the system into **small, independent units** (modules, packages, services).
+- Define **clear boundaries** around modules using interfaces or APIs.
+- Organize modules around **business capabilities** rather than technical layers.
+- Ensure modules can be **developed, tested, and deployed independently**.
+
+### Practical Examples
+
+- In a web application, separate modules for:
+  - **User Authentication** (login, tokens).
+  - **Product Catalog** (CRUD for items).
+  - **Order Processing** (checkout, payment).
+- Each module has its own tests and deploy pipeline. Changing “Product Catalog” doesn’t require redeploying the “User Authentication” module.
+
+---
+
+## 2. Cohesion
+
+### Strategies
+
+- Each module/class should have **one clear purpose**.
+- Group related behavior and data together.
+- Avoid “utility” modules that do many unrelated tasks.
+- Strive for **high internal cohesion** (all parts of a module are strongly related).
+
+### Practical Examples
+
+- A `PaymentService` module:
+  - Handles payment authorization and capture.
+  - Does **not** send user emails (that belongs in `NotificationService`).
+- Cohesion increases testability: unit tests for `PaymentService` focus only on payment logic.
+
+---
+
+## 3. Separation of Concerns
+
+### Strategies
+
+- Divide responsibilities into **distinct areas** to avoid overlap.
+- Use layered architectures (UI, domain, data) or ports/adapters to separate logic.
+- Make side-effects explicit and confined to certain modules.
+- Keep core domain logic pure (without IO, frameworks, or UI code).
+
+### Practical Examples
+
+- In a microservice:
+  - **API Layer**: Handles HTTP requests/responses.
+  - **Domain Layer**: Contains business rules.
+  - **Persistence Layer**: Handles database interactions.
+- Adding caching only touches the **Persistence Layer**, without rewriting domain rules.
+
+---
+
+## 4. Information Hiding & Abstraction
+
+### Strategies
+
+- Hide implementation details behind stable interfaces.
+- Provide abstractions that focus on **what** a module does, not **how** it does it.
+- Avoid leaking private details across module boundaries.
+- Use encapsulation: keep variables and internal logic private where possible.
+
+### Practical Examples
+
+- A `UserRepository` interface defines:
+  - `getUserById(id)`
+  - `saveUser(user)`
+- Implementation details (SQL queries, ORMs, caching) are hidden.  
+  The rest of the system depends only on the abstraction, not on whether it’s PostgreSQL or MongoDB.
+
+---
+
+## 5. Managing Coupling
+
+### Strategies
+
+- Prefer **loose coupling**: modules depend on each other’s interfaces, not implementations.
+- Reduce **temporal coupling** (one module requiring another to run in a specific order).
+- Use dependency inversion: higher-level modules depend on abstractions.
+- Keep dependencies **explicit** and **minimized**.
+
+### Practical Examples
+
+- Using **message queues** (Kafka, RabbitMQ):
+  - Order Service publishes “OrderPlaced” events.
+  - Payment Service subscribes.  
+    They are coupled only by the event schema, not direct calls.
+- In code:
+  - `OrderService` depends on a `PaymentGateway` interface, not on a specific Stripe or PayPal SDK.
+  - Switching providers requires only updating the implementation, not the calling code.
+
+---
+
+# Summary Conceptual Map
+
+- **Modularity** → Small, independent units aligned with business capabilities.
+- **Cohesion** → Each unit has one clear responsibility.
+- **Separation of Concerns** → Distinct layers/areas prevent overlap.
+- **Information Hiding & Abstraction** → Expose “what,” hide “how.”
+- **Managing Coupling** → Depend on abstractions, keep connections loose.
+
+---
