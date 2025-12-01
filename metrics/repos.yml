@@ -1,0 +1,10 @@
+# GitHub repositories to scan for PR metrics
+# Organization and list of repositories to include in sprint metrics
+
+github:
+  org: MD-HQ
+  repos:
+    - infrastructure
+    - MDHQ2.4
+    - Clients
+    - api-docs
